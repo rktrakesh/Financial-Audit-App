@@ -27,25 +27,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public: login and register
-                .requestMatchers("/api/auth/**").permitAll()
-                // Dashboard: AUDITOR or ADMIN only
-                .requestMatchers("/api/transactions/dashboard").hasAnyRole("AUDITOR", "ADMIN")
-                // Approve: AUDITOR or ADMIN only
-                .requestMatchers("/api/transactions/*/approve").hasAnyRole("AUDITOR", "ADMIN")
-                // Alerts: AUDITOR or ADMIN only
-                .requestMatchers("/api/alerts/**").hasAnyRole("AUDITOR", "ADMIN")
-                // Audit logs: AUDITOR or ADMIN only
-                .requestMatchers("/api/audit/**").hasAnyRole("AUDITOR", "ADMIN")
-                // Transactions: any authenticated user
-                .requestMatchers("/api/transactions/**").authenticated()
-                // Everything else: authenticated
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/swagger-ui",
+                                "/swagger-ui/",
+                                "/webjars/**",
+                                "/swagger-resources/**").permitAll()
+
+                        .requestMatchers("/api/transactions/dashboard").hasAnyRole("AUDITOR", "ADMIN")
+                        .requestMatchers("/api/transactions/*/approve").hasAnyRole("AUDITOR", "ADMIN")
+                        .requestMatchers("/api/alerts/**").hasAnyRole("AUDITOR", "ADMIN")
+                        .requestMatchers("/api/audit/**").hasAnyRole("AUDITOR", "ADMIN")
+                        .requestMatchers("/api/transactions/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
